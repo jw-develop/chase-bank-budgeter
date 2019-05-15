@@ -20,15 +20,25 @@ public class StatementConsolidator {
 		for (File f : files) {
 			Scanner sca = new Scanner(f);
 			
+			// Moving past title stuff line.
+			if (sca.hasNext())
+				sca.nextLine();
+			else
+				System.err.println("Invalid file");
+			
+			// Reading out all transactions.
 			while (sca.hasNext()) {
-				trans.add(new Transaction(sca.nextLine()));
+				Transaction t = new Transaction(sca.nextLine());
+				if (!t.tag().equals("invalid"))
+					trans.add(t);
+				else
+					System.err.println(t);
 			}
 			
-			for (Transaction t : trans)
-				System.out.println(t);
+//			for (Transaction t : trans)
+//				System.out.println(t);
 			
 			sca.close();
 		}
 	}
-	
 }

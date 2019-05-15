@@ -33,11 +33,9 @@ public class Config {
 	
 	public static String option(String key) {
 		if (options == null)
-			
 			try {
 				populateOptions();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		
