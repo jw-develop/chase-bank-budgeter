@@ -1,7 +1,3 @@
-+wheaton
-(.*)(WHEATON)\\s(IL)(.*)
-0,1,2
-
-+aldi
-(.*)(ALDI)\\s(IL)(.*)
++basic
+(.*)(WHEATON)\\s()
 0,1,2

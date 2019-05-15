@@ -14,6 +14,12 @@ public class TagParser {
 	
 	interface Parser {String[] data(String desc);}
 	private static List<Parser> parserList = new ArrayList<>();
+	private static String[] locations = {
+			"wheaton il",
+			"glen ellyn il",
+			"carol stream il",
+			"pine city mn"
+	};
 	private static String c_desc;
 	
 	/**
@@ -23,16 +29,17 @@ public class TagParser {
 	 * DESCRIPTION, CITY, and STATE, respectively.
 	 */
 	static {
+		String endDate = "\\d\\d\\/\\d\\d[\"]";
 		convert(
-				"wheaton",
-				"(.*)(WHEATON)\\s(IL)(.*)",
-				0,1,2
+				"normal",
+				"[\"](.+)\\s(\\D\\D)\\s"+endDate,
+				1,2
 		);
-		convert(
-				"aldi",
-				"(.*)(ALDI)(.*)(IL)(.*)",
-				0,1,2
-		);
+//		convert(
+//				"aldi",
+//				"(.+)\\s(\\w+)\\s(\\D\\D)\\s(.+)[\"]",
+//				0,1,2
+//		);
 	}
 	
 	/**
@@ -45,7 +52,7 @@ public class TagParser {
 	 * @param b City index.
 	 * @param c State index.
 	 */
-	private static void convert(String tag,String regex,int a,int b,int c) {
+	private static void convert(String tag,String regex,int a,int b) {
 		parserList.add(desc -> {
 			String[] toReturn = null;
 			
@@ -54,8 +61,8 @@ public class TagParser {
 			if (m.matches()) {
 				toReturn =  new String[] {
 						m.group(a),
+						"UNKNOWN",
 						m.group(b),
-						m.group(c),
 						tag
 				};
 			}
@@ -75,12 +82,25 @@ public class TagParser {
 		// Kill extra whitespace. Should this be here?
 		desc = desc.replaceAll(" +"," ");
 		c_desc = desc;
+		String loc = "UNKNOWN";
+		
+		// Check for cities
+		for (String l : locations) {
+			l = l.toUpperCase();
+			Matcher m = Pattern.compile("(.+)("+l+")(.+)").matcher(c_desc);
+			if (m.matches()) {
+				loc = l.substring(0,l.length()-3);
+				desc = desc.replace(loc,"");
+			}
+		}
 		
 		// Checks all parsing schemes and returns if valid.
 		for (Parser tP : parserList) {
 			toReturn = tP.data(desc);
-			if (!(toReturn == null))
+			if (!(toReturn == null)) {
+				toReturn[1] = loc;
 				return toReturn;
+			}
 		}
 		
 		// No match found at all.
