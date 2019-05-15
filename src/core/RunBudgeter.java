@@ -1,37 +1,21 @@
 package core;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Scanner;
+import java.io.FileNotFoundException;
+
+import process.StatementConsolidator;
 
 public class RunBudgeter {
 	
-	public static String statements_location;
-	
 	public static void main(String[] args) {
 		
+		System.out.println(Config.option("statements"));
+		
 		try {
-			readConfig();
-		} catch (IOException e) {
+			StatementConsolidator.consolidate();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	}
-	
-	private static void readConfig() throws IOException {
-		
-		Scanner config = new Scanner(Paths.get("config.txt"));
-		
-		while (config.hasNext()) {
-			String line = config.nextLine();
-			String[] words = line.split(":");
-			
-			// Statements config section.
-			if (words.length > 1 && words[0].equals("statements"));
-					statements_location = words[1];
-		}
-		
-		config.close();
 	}
 	
 }
