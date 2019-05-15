@@ -1,5 +1,10 @@
 package info;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Houses static class to parse out to a tag.
  * @author jameswhite
@@ -7,36 +12,78 @@ package info;
  */
 public class TagParser {
 	
+	interface Parser {String[] data(String desc);}
+	private static List<Parser> parserList = new ArrayList<>();
+	private static String c_desc;
+	
+	/**
+	 * Most important section.
+	 * Each entry contains the name of the tag, the regex that it
+	 * matches to, and the indices of the groups that correspond to
+	 * DESCRIPTION, CITY, and STATE, respectively.
+	 */
+	static {
+		convert(
+				"wheaton",
+				"(.*)(WHEATON)\\s(IL)(.*)",
+				0,1,2
+		);
+		convert(
+				"aldi",
+				"(.*)(ALDI)(.*)(IL)(.*)",
+				0,1,2
+		);
+	}
+	
+	/**
+	 * Method to populate parserList, which will interpret data sent
+	 * by parse() and return a list of relevant data.
+	 * 
+	 * @param tag Tag to attach.
+	 * @param regex Pattern to test for.
+	 * @param a Description index.
+	 * @param b City index.
+	 * @param c State index.
+	 */
+	private static void convert(String tag,String regex,int a,int b,int c) {
+		parserList.add(desc -> {
+			String[] toReturn = null;
+			
+			Matcher m = Pattern.compile(regex).matcher(c_desc);
+			
+			if (m.matches()) {
+				toReturn =  new String[] {
+						m.group(a),
+						m.group(b),
+						m.group(c),
+						tag
+				};
+			}
+
+			return toReturn;
+		});
+	}
+
 	/**
 	 * Parses a description into parts.
 	 * @param desc Unparsed description.
 	 * @return Description,City,State,Tag
 	 */
 	public static String[] parse(String desc) {
+		String[] toReturn;
 		
+		// Kill extra whitespace. Should this be here?
 		desc = desc.replaceAll(" +"," ");
-		String[] b_desc = desc.split(" ");
-		String new_desc = "";
-		String city = "";
-		String state = "";
-		String tag = "";
+		c_desc = desc;
 		
-		int i = 0;
-		for (i=0;i < b_desc.length && !b_desc[i].equals("");i++);
-		
-		// If valid desc
-		if (i > 2) {
-			state = b_desc[i-2];
-			new_desc += b_desc[0];
-			for (int j=1;j<i-2;j++)
-				new_desc +=" "+b_desc[j];
-			
-			// Trim off parentheses.
-			if (new_desc.charAt(0) == '"')
-				new_desc = new_desc.substring(1);
+		// Checks all parsing schemes and returns if valid.
+		for (Parser tP : parserList) {
+			toReturn = tP.data(desc);
+			if (!(toReturn == null))
+				return toReturn;
 		}
-		else
-			tag = "invalid";
-		return new String[] {new_desc,city,state,tag};
+		
+		// No match found at all.
+		return new String[] {c_desc,"","","invalid"};
 	}
 }
