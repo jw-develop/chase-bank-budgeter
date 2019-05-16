@@ -1,18 +1,17 @@
 package core;
 
-import java.io.FileNotFoundException;
-
-import process.StatementConsolidator;
+import display.CBBFrame;
 
 public class RunBudgeter {
 	
 	public static void main(String[] args) {
+//		StatementConsolidator.consolidate();
 		
-		try {
-			StatementConsolidator.consolidate();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		CBBFrame frame = CBBFrame.init("Chase Bank Budgeter");
+		frame.setVisible(true);
+		
+		for (int i = 0; i < 15; i++) {
+			System.out.println("Babstown");
 		}
 	}
 	

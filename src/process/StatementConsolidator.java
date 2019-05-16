@@ -13,11 +13,34 @@ import java.util.Scanner;
 import core.Config;
 import info.Transaction;
 
+/**
+ * Uses config file to find location of Chase bank statements, then
+ * consolidates .csv files into master_statement.csv file, which is
+ * written just above the raw files location.
+ * 
+ * csv scheme is 
+ * 
+ * date,amount,city:state,description,
+ * 
+ * @author jameswhite
+ *
+ */
 public class StatementConsolidator {
 	
-	public static void consolidate() throws FileNotFoundException {
-		
-		String source = Config.option("statements");
+	private static String source;
+
+	public static void consolidate() {
+		try {
+			genMasterStatement();
+//			genMonthlyStatements();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void genMasterStatement() throws FileNotFoundException {
+		source = Config.option("statements");
 		
 		File[] files = new File(source).listFiles();
 		
@@ -37,21 +60,22 @@ public class StatementConsolidator {
 				Transaction t = new Transaction(sca.nextLine());
 				if (!t.tag().equals("invalid"))
 					trans.add(t);
-				else
-					System.err.println(t.toRow());
+//				else
+//					System.err.println(t.toRow());
 			}
 			
 			sca.close();
 		}
 		
+		// Write to file.
 		String toWrite = "";
-		Path path = Paths.get(source+"../master_statement.csv");
-		
-		for (Transaction t : trans) {
-			System.out.println(t);
+		for (Transaction t : trans)
 			toWrite += t.toRow()+"\n";
-		}
-		
+		Path path = Paths.get(source+"master_statement.csv");
+		write(toWrite,path);
+	}
+	
+	private static void write(String toWrite,Path path) {
 		try {
 			//Make and write to the file.
 			Files.deleteIfExists(path);
